@@ -455,24 +455,24 @@ public class ImagePickerDelegate
   }
 
   private void launchMultiPickImageFromGalleryIntent(Boolean usePhotoPicker) {
-//    Intent pickMultiImageIntent;
-//    if (usePhotoPicker && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//      pickMultiImageIntent =
-//          new ActivityResultContracts.PickMultipleVisualMedia()
-//              .createIntent(
-//                  activity,
-//                  new PickVisualMediaRequest.Builder()
-//                      .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
-//                      .build());
-//    } else {
-//      pickMultiImageIntent = new Intent(Intent.ACTION_GET_CONTENT);
-//      pickMultiImageIntent.setType("image/*");
-//      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-//        pickMultiImageIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//      }
-//    }
-//    activity.startActivityForResult(
-//        pickMultiImageIntent, REQUEST_CODE_CHOOSE_MULTI_IMAGE_FROM_GALLERY);
+    Intent pickMultiImageIntent;
+    if (usePhotoPicker && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      pickMultiImageIntent =
+          new ActivityResultContracts.PickMultipleVisualMedia()
+              .createIntent(
+                  activity,
+                  new PickVisualMediaRequest.Builder()
+                      .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
+                      .build());
+    } else {
+      pickMultiImageIntent = new Intent(Intent.ACTION_GET_CONTENT);
+      pickMultiImageIntent.setType("image/*");
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+        pickMultiImageIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+      }
+    }
+    activity.startActivityForResult(
+        pickMultiImageIntent, REQUEST_CODE_CHOOSE_MULTI_IMAGE_FROM_GALLERY);
   }
 
   public void takeImageWithCamera(
@@ -698,13 +698,17 @@ public class ImagePickerDelegate
       ArrayList<MediaPath> paths = new ArrayList<>();
       if (intent.getClipData() != null) {
         for (int i = 0; i < intent.getClipData().getItemCount(); i++) {
-          paths.add(
-              new MediaPath(
-                  fileUtils.getPathFromUri(activity, intent.getClipData().getItemAt(i).getUri()),
-                  null));
+          if (intent.getClipData().getItemAt(i).getUri() != null) {
+            paths.add(
+                    new MediaPath(
+                            fileUtils.getPathFromUri(activity, intent.getClipData().getItemAt(i).getUri()),
+                            null));
+          }
         }
       } else {
-        paths.add(new MediaPath(fileUtils.getPathFromUri(activity, intent.getData()), null));
+        if (intent.getData() != null) {
+          paths.add(new MediaPath(fileUtils.getPathFromUri(activity, intent.getData()), null));
+        }
       }
       handleMediaResult(paths);
       return;
